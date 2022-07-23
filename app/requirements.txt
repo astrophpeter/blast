@@ -99,3 +99,4 @@ coverage
 scikit-image
 dustmaps
 astro-sedpy
+django-revproxy

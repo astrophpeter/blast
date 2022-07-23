@@ -7,6 +7,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from django.conf import settings
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 from photutils.aperture import SkyEllipticalAperture
 from sedpy import observate
 
@@ -150,6 +151,9 @@ class Status(models.Model):
 
         return badge_class
 
+    def __str__(self):
+        return f"{self.message}"
+
     def __repr__(self):
         return f"{self.message}"
 
@@ -161,6 +165,9 @@ class Task(models.Model):
 
     name = models.CharField(max_length=100)
     objects = TaskManager()
+
+    def __str__(self):
+        return self.name
 
     def __repr__(self):
         return f"{self.name}"
@@ -362,6 +369,7 @@ class AperturePhotometry(models.Model):
 class ProspectorResult(models.Model):
     """Model to store prospector results"""
 
+    host = models.ForeignKey(Host, on_delete=models.CASCADE, null=True, blank=True)
     posterior = models.FileField(upload_to=fits_file_path, null=True, blank=True)
     log_mass_16 = models.FloatField(null=True, blank=True)
     log_mass_50 = models.FloatField(null=True, blank=True)

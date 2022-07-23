@@ -1,7 +1,7 @@
 {% extends 'host/base.html' %}
 
 {% block title %} Home {% endblock %}
-
+{% block script %} {{ bokeh_cutout_script | safe }} {% endblock %}
 {% block body %}
 
 {% load crispy_forms_tags %}
@@ -12,27 +12,36 @@
   <a href="transients/" role="button" class="btn btn-success">Search the blast database <i class="bi bi-search"></i></a>
 </div>
 
-<div>
-  <p>
-    The host galaxies of astrophysical transients play a key role in our
-    understanding of their progenitor systems and the use of Type Ia
-    supernovae as standardizable candles for cosmology. However, fully
-    characterizing host galaxy environments requires a high-statistics, unbiased,
-    multiwavelength dataset, preferably with 1-2 kpc resolution. Current analyses
-    are limited by sample sizes of anywhere from ∼10-200 SNe, predominantly
-    optical host observations, and observational biases such as selecting from
-    surveys that search for SNe within a pre-selected a set of galaxies.
-  </p>
 
-  <p>
-    Blast lightweight public web application built to find a transinet's host
-    galaxy, identify the available
-    archival data, and measure the resulting host galaxy star formation
-    rates, masses, and stellar ages - for every new transient reported to
-    the IAU in real-time after the transient is announced. This information
-    is not provided by any existing transient broker service.
-  </p>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-5">
+                 <p>
+                    The host galaxies of astrophysical transients play a key role in our
+                    understanding of their progenitor systems and the use of Type Ia
+                    supernovae as standardizable candles for cosmology. However, fully
+                    characterizing host galaxy environments requires a high-statistics, unbiased,
+                    multiwavelength dataset, preferably with 1-2 kpc resolution. Current analyses
+                   are limited by sample sizes of anywhere from ∼10-200 SNe, predominantly
+                   optical host observations, and observational biases such as selecting from
+                   surveys that search for SNe within a pre-selected a set of galaxies.
+                </p>
 
+                <p>
+                  Blast lightweight public web application built to find a transinet's host
+                  galaxy, identify the available
+                  archival data, and measure the resulting host galaxy star formation
+                  rates, masses, and stellar ages - for every new transient reported to
+                  the IAU in real-time after the transient is announced. This information
+                  is not provided by any existing transient broker service.
+                </p>
+        </div>
+
+        <div class="col-lg-7">
+            {% include "host/analytics_information_card.html" %}
+        </div>
+    </div>
 </div>
+
 
 {% endblock %}

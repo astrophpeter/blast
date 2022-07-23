@@ -13,4 +13,5 @@ urlpatterns = [
     path(f"""{base_path}transients/<slug:slug>/""", views.results),
     path(f"""{base_path}acknowledgements/""", views.acknowledgements),
     path(f"""{base_path}""", views.home),
+    path(f"""{base_path}flower/""", views.flower_view),
 ]

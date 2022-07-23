@@ -1,16 +1,22 @@
 from django.test import TestCase
 
+from ..base_tasks import initialise_all_tasks_status
+from ..base_tasks import TransientTaskRunner
+from ..base_tasks import update_status
 from ..models import Cutout
 from ..models import Filter
 from ..models import Status
 from ..models import Task
 from ..models import TaskRegister
 from ..models import Transient
-from ..processing import GhostRunner
-from ..processing import ImageDownloadRunner
-from ..processing import initialise_all_tasks_status
-from ..processing import TaskRunner
-from ..processing import update_status
+from ..transient_tasks import Ghost
+from ..transient_tasks import ImageDownload
+
+# from ..processing import GhostRunner
+# from ..processing import ImageDownloadRunner
+# from ..processing import initialise_all_tasks_status
+# from ..processing import TaskRunner
+# from ..processing import update_status
 
 
 class TaskRunnerTest(TestCase):
@@ -25,14 +31,15 @@ class TaskRunnerTest(TestCase):
     ]
 
     def setUp(self):
-        class TestRunnerProcessed(TaskRunner):
+        class TestRunnerProcessed(TransientTaskRunner):
             def _run_process(self, transient):
                 return "processed"
 
             def _prerequisites(self):
                 return {"Cutout download": "not processed"}
 
-            def _task_name(self):
+            @property
+            def task_name(self):
                 return "Cutout download"
 
             def _failed_status_message(self):
@@ -40,14 +47,15 @@ class TaskRunnerTest(TestCase):
 
         self.processed_runner = TestRunnerProcessed()
 
-        class TestRunnerFailed(TaskRunner):
+        class TestRunnerFailed(TransientTaskRunner):
             def _run_process(self, transient):
                 raise ValueError
 
             def _prerequisites(self):
                 return {"Cutout download": "not processed"}
 
-            def _task_name(self):
+            @property
+            def task_name(self):
                 return "Cutout download"
 
             def _failed_status_message(self):
@@ -55,14 +63,15 @@ class TaskRunnerTest(TestCase):
 
         self.failed_runner = TestRunnerFailed()
 
-        class TestRunnerNotProcessed(TaskRunner):
+        class TestRunnerNotProcessed(TransientTaskRunner):
             def _run_process(self, transient):
                 return "not processed"
 
             def _prerequisites(self):
                 return {"Cutout download": "not processed"}
 
-            def _task_name(self):
+            @property
+            def task_name(self):
                 return "Cutout download"
 
             def _failed_status_message(self):
@@ -70,14 +79,15 @@ class TaskRunnerTest(TestCase):
 
         self.not_processed_runner = TestRunnerNotProcessed()
 
-        class TestRunnerTwoPrereqs(TaskRunner):
+        class TestRunnerTwoPrereqs(TransientTaskRunner):
             def _run_process(self, transient):
                 return "not processed"
 
             def _prerequisites(self):
                 return {"Cutout download": "not processed", "Host match": "processed"}
 
-            def _task_name(self):
+            @property
+            def task_name(self):
                 return "Cutout download"
 
             def _failed_status_message(self):
@@ -85,7 +95,7 @@ class TaskRunnerTest(TestCase):
 
         self.two_prereqs_runner = TestRunnerTwoPrereqs()
 
-        class TestRunnerTwoPrereqsSuc(TaskRunner):
+        class TestRunnerTwoPrereqsSuc(TransientTaskRunner):
             def _run_process(self, transient):
                 return "not processed"
 
@@ -95,7 +105,8 @@ class TaskRunnerTest(TestCase):
                     "Host match": "not processed",
                 }
 
-            def _task_name(self):
+            @property
+            def task_name(self):
                 return "Cutout download"
 
             def _failed_status_message(self):
@@ -276,7 +287,7 @@ class GHOSTRunnerTest(TestCase):
     ]
 
     def setUp(self):
-        self.ghost_runner = GhostRunner()
+        self.ghost_runner = Ghost()
 
     def test_prereqs(self):
         self.assertTrue(
@@ -311,7 +322,7 @@ class ImageDownloadTest(TestCase):
     ]
 
     def setUp(self):
-        class DummyImageDownloadRunner(ImageDownloadRunner):
+        class DummyImageDownloadRunner(ImageDownload):
             def _run_process(self, transient):
                 return "processed"
 

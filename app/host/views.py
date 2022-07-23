@@ -1,4 +1,18 @@
+from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponse
+<<<<<<< HEAD
+from django.contrib.auth.mixins import UserPassesTestMixin
+from revproxy.views import ProxyView
+from django.urls import re_path
+=======
+<<<<<<< HEAD
 from django.shortcuts import render
+=======
+from django.contrib.auth.mixins import UserPassesTestMixin
+from revproxy.views import ProxyView
+from django.urls import re_path
+>>>>>>> 4ecb7bc (factoring out .env)
+>>>>>>> prospector_rebase
 
 from .forms import ImageGetForm
 from .forms import TransientSearchForm
@@ -10,6 +24,7 @@ from .models import Filter
 from .models import TaskRegisterSnapshot
 from .models import Transient
 from .plotting_utils import plot_cutout_image
+from .plotting_utils import plot_pie_chart
 from .plotting_utils import plot_sed
 from .plotting_utils import plot_timeseries
 
@@ -137,5 +152,58 @@ def acknowledgements(request):
 
 
 def home(request):
-    context = {}
-    return render(request, "index.html", context)
+
+    # analytics_results = {}
+
+    # for aggregate in ["total", "not completed", "completed", "waiting"]:
+
+    #    transients = TaskRegisterSnapshot.objects.filter(
+    #        aggregate_type__exact=aggregate
+    #    )
+    #    transients_ordered = transients.order_by("-time")
+
+    #    if transients_ordered.exists():
+    #        transients_current = transients_ordered[0]
+    #    else:
+    #        transients_current = None
+
+    #    analytics_results[
+    #        f"{aggregate}_transients_current".replace(" ", "_")
+    #    ] = transients_current
+    # bokeh_processing_context = plot_timeseries()
+
+    # bokeh_processing_context =  plot_pie_chart(analytics_results)
+
+    return render(
+        request, "index.html"
+    )  # , #{**analytics_results, **bokeh_processing_context}
+    # )
+
+
+# @user_passes_test(lambda u: u.is_staff and u.is_superuser)
+def flower_view(request):
+    """passes the request back up to nginx for internal routing"""
+    response = HttpResponse()
+    path = request.get_full_path()
+    path = path.replace('flower', 'flower-internal', 1)
+    response['X-Accel-Redirect'] = path
+    return response
+
+
+
+
+
+class FlowerProxyView(UserPassesTestMixin, ProxyView):
+    # `flower` is Docker container, you can use `localhost` instead
+    upstream = 'http://{}:{}'.format('flower', 8888)
+    url_prefix = 'flower'
+    rewrite = (
+        (r'^/{}$'.format(url_prefix), r'/{}/'.format(url_prefix)),
+     )
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    @classmethod
+    def as_url(cls):
+        return re_path(r'^(?P<path>{}.*)$'.format(cls.url_prefix), cls.as_view())

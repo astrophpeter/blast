@@ -1,7 +1,7 @@
 #!/bin/env bash
 
-bash entrypoints/wait-for-it.sh database:3306 --timeout=0 &&
-bash entrypoints/wait-for-it.sh nginx:80 --timeout=0 &&
+bash entrypoints/wait-for-it.sh ${DATABASE_HOST}:${DATABASE_PORT} --timeout=0 &&
+bash entrypoints/wait-for-it.sh ${WEB_SERVER_HOST}:${WEB_SERVER_PORT} --timeout=0 &&
 python manage.py makemigrations &&
 python manage.py migrate &&
-gunicorn app.wsgi:application --bind 0.0.0.0:8000
+gunicorn app.wsgi:application --bind 0.0.0.0:${WEB_APP_PORT}

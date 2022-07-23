@@ -7,12 +7,12 @@ services:
       context: ../app/
     command: bash entrypoints/docker-entrypoint.app.sh
     ports:
-      - "8000:8000"
+      - 8000:${WEB_APP_PORT}
     volumes:
       - ../app:/app
       - ../data/cutout_cdn:/cutout_cdn
       - ../data/ghost_output:/ghost_output
-      - ../data/pospector_output:/prospector_output
+      - ../data/prospector_output:/prospector_output
       - ../data/tns_staging:/tns_staging
       - ../data/transmission:/transmission
     env_file:
@@ -26,16 +26,19 @@ services:
       - ../app:/app
       - ../data/cutout_cdn:/cutout_cdn
       - ../data/ghost_output:/ghost_output
-      - ../data/pospector_output:/prospector_output
+      - ../data/prospector_output:/prospector_output
       - ../data/tns_staging:/tns_staging
       - ../data/transmission:/transmission
     env_file:
       - ../env/.env.dev
   rabbitmq:
     restart: always
-    image: rabbitmq:3.9-alpine
+    image: rabbitmq:3.10.6-management-alpine
     ports:
-      - "5672:5672"
+      - 5672:${MESSAGE_BROKER_PORT}
+      - 15672:${MESSAGE_BROKER_MANAGEMENT_PORT}
+    volumes:
+      - ../data/rabbitmq_data:/data
     env_file:
       - ../env/.env.dev
   celery_beat:
@@ -57,13 +60,25 @@ services:
     volumes:
       - ../data/database/:/var/lib/mysql/
     ports:
-      - "3306:3306"
+      - "3306:${DATABASE_PORT}"
   nginx:
     restart: always
     image: nginx:1.21-alpine
     volumes:
-      - ../static:/static
+      - ../app/static:/static
       - ../data/cutout_cdn:/cutout_cdn
       - ../nginx/default.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "80:80"
+      - 80:${WEB_SERVER_PORT}
+    env_file:
+      - ../env/.env.dev
+  flower:
+    build:
+      context: ../flower/
+    command: bash entrypoints/docker-entrypoint.flower.sh
+    ports:
+      - 8888:${FLOWER_PORT}
+    volumes:
+      - ../app/entrypoints:/data/entrypoints
+    env_file:
+      - ../env/.env.dev

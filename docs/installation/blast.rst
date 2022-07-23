@@ -44,18 +44,18 @@ Once in the blast directory, start the docker container.
 
 .. code:: none
 
-    bash blast.run.local.sh
+    bash run/blast.run.local.sh
 
 .. note::
     The web app container may fail a couple of times while it waits for the
     database to be setup. Do not worry, this is normal. The web app container
     will restart automatically until it successfully connects to the database.
 
-Then go to `https://0.0.0.0/transients <https://0.0.0.0/transients>`_ in your web browser
+Then go to `https://0.0.0.0/transients <https://0.0.0.0/>`_ in your web browser
 and blast should be running.
 
 .. warning::
-    Stating the web app via the :code:`blast.run.local.sh` script deletes your local copy of
+    Stating the web app via the :code:`run/blast.run.local.sh` script deletes your local copy of
     the database in :code:`data/database/` and the app runs with an empty database.
 
 To stop blast from running, open a new terminal window and run.
@@ -68,4 +68,4 @@ To run tests with the blast app, run
 
 .. code:: none
 
-    bash blast.tests.local.sh
+    bash run/blast.tests.local.sh
